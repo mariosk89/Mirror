@@ -1,2 +1,2 @@
 # Mirror
-Simple java class browser using reflection.
+Simple java class browser using reflection. 
