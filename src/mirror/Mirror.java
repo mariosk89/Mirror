@@ -18,7 +18,7 @@ public class Mirror {
 	{
 		try 
 		{
-			String className = "samples.Car";
+			String className = "samples.Car"; 
 			System.out.println("*------------------------------------------------------*");
 			System.out.println("*--------------- MIRROR - CLASS BROWSER ---------------*");
 			System.out.println("*------------------------------------------------------*");
