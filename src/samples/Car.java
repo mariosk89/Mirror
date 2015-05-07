@@ -12,7 +12,7 @@ public class Car extends AbstractVehicle
 	}
 
 	@Override
-	public void move() 
+	public void move(int x, int y) 
 	{
 		System.out.println("Car moving !!!");		
 	}

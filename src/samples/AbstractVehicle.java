@@ -15,7 +15,7 @@ public abstract class AbstractVehicle
 		this.model = model;
 	}
 	
-	public abstract void move();
+	public abstract void move(int x, int y);
 	
 	public String getManufacturer()
 	{
