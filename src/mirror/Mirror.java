@@ -134,12 +134,10 @@ public class Mirror {
 			}
 			else
 			{
-				int fieldCounter = 1;
 				for(int fIndex = 0 ; fIndex < fields.length ; fIndex++)
 				{
 					Field field = fields[fIndex];					
-					reflectField(field,fieldCounter,"");
-					fieldCounter++;
+					reflectField(field,(fIndex+1),"");
 				}
 			}
 			System.out.println("");
@@ -156,9 +154,7 @@ public class Mirror {
 					Field[] superClassFields = superClass.getDeclaredFields();
 					
 					if(superClassFields.length > 0)
-					{
-						int superClassFieldsCounter = 0;
-						
+					{						
 						for(int fIndex = 0 ; fIndex < superClassFields.length ; fIndex++)
 						{
 							if(fIndex == 0)
@@ -187,9 +183,10 @@ public class Mirror {
 			{
 				System.out.println(BLANK + "None");
 			}
+			System.out.println("");
 			
 			
-			System.out.println("\nClass methods: ");
+			System.out.println("Class methods: ");
 			Method[] declaredMethods = c.getDeclaredMethods();
 			
 			if(declaredMethods.length == 0)
@@ -198,12 +195,10 @@ public class Mirror {
 			}
 			else
 			{
-				int methodCounter = 1;
 				for(int i = 0 ; i < declaredMethods.length ; i++)
 				{
 					Method m = declaredMethods[i];
-					reflectMethod(m,methodCounter,"");					
-					methodCounter++;
+					reflectMethod(m,(i+1),"");					
 				}
 			}
 			
@@ -219,9 +214,7 @@ public class Mirror {
 					Method[] superClassMethods = superClass.getDeclaredMethods();
 					
 					if(superClassMethods.length > 0)
-					{
-						int superClassMethodsCounter = 0;
-						
+					{						
 						for(int mIndex = 0 ; mIndex < superClassMethods.length ; mIndex++)
 						{
 							if(mIndex == 0)
@@ -231,11 +224,10 @@ public class Mirror {
 							}
 							
 							Method superClassMethod = superClassMethods[mIndex];	
-							if(!Modifier.isPrivate(superClassMethod.getModifiers()))
+							if(!Modifier.isPrivate(superClassMethod.getModifiers()) && !Modifier.isAbstract(superClassMethod.getModifiers()))
 							{
 								reflectMethod(superClassMethod,(mIndex+1),BLANK);
-							}
-							
+							}							
 						}
 					}	
 					
@@ -252,7 +244,60 @@ public class Mirror {
 			{
 				System.out.println(BLANK + "None");
 			}
-						
+			System.out.println("");
+			
+			
+			System.out.println("Class Constructors:");
+			Constructor[] constructors = c.getDeclaredConstructors();
+			for(int constr = 0 ; constr < constructors.length ; constr++)
+			{
+				Constructor constructor = constructors[constr];
+				reflectConstructor(constructor,(constr+1),"");
+			}
+			
+			
+			System.out.println("Superclasses' constructors:");
+			int totalInheritedConstructorsCounter = 0 ;
+			superClass = c.getSuperclass();
+			if(superClass != null && superClass != Object.class)
+			{
+				int superClassCounter = 1;
+				do
+				{											
+					Constructor[] superClassConstructors = superClass.getDeclaredConstructors();
+					
+					if(superClassConstructors.length > 0)
+					{						
+						for(int mIndex = 0 ; mIndex < superClassConstructors.length ; mIndex++)
+						{
+							if(mIndex == 0)
+							{
+								System.out.println(BLANK + superClassCounter + " Inherited from: " + superClass.getName());
+								totalInheritedConstructorsCounter++;
+							}
+							
+							Constructor superClassConstructor = superClassConstructors[mIndex];	
+							if(!Modifier.isPrivate(superClassConstructor.getModifiers()) && !Modifier.isAbstract(superClassConstructor.getModifiers()))
+							{
+								reflectConstructor(superClassConstructor,(mIndex+1),BLANK);
+							}							
+						}
+					}	
+					
+					superClass = superClass.getSuperclass();
+					superClassCounter++;
+				}
+				while(superClass != null && superClass != Object.class);
+				if(totalInheritedFieldsCounter == 0)
+				{
+					System.out.println(BLANK + "None");
+				}
+			}
+			else
+			{
+				System.out.println(BLANK + "None");
+			}
+			System.out.println("");
 			
 //			Constructor constr = c.getConstructor(String.class, String.class, int.class);
 //			System.out.println("Creating a Mazda 2 car");
@@ -262,8 +307,6 @@ public class Mirror {
 		{
 			e.printStackTrace();
 		} 
-		
-
 	}
 
 	private static void reflectField(Field field, int fieldCounter, String intent)
@@ -287,7 +330,7 @@ public class Mirror {
 		Class[] methodExceptionTypes = m.getExceptionTypes();
 		
 		System.out.println(intent + BLANK + methodCounter + "  Name: " + methodName);
-		System.out.println(intent + BLANK + BLANK + "Return Type: " + methodName);
+		System.out.println(intent + BLANK + BLANK + "Return Type: " + methodReturnType);
 		System.out.println(intent + BLANK + BLANK + "Modifiers: " + methodModifiers);
 		System.out.println(intent + BLANK + BLANK + "Parameter Types: ");
 		if(methodParameterTypes.length == 0)
@@ -323,6 +366,55 @@ public class Mirror {
 					exceptionTypesString = exceptionTypesString + ", ";
 				}
 				exceptionTypesString += methodExceptionTypes[p].getCanonicalName();
+			}
+			System.out.println(intent + BLANK + BLANK + BLANK + exceptionTypesString);
+		}
+		System.out.println("");
+	}
+	
+	private static void reflectConstructor(Constructor constructor, int constructorCounter, String intent)
+	{
+		String constructorName = constructor.getName();
+		String constructorModifiers = Modifier.toString(constructor.getModifiers());
+		Class[] constructorParameterTypes = constructor.getParameterTypes();
+		Class[] constructorExceptionTypes = constructor.getExceptionTypes();
+		
+		System.out.println(intent + BLANK + constructorCounter + "  Name: " + constructorName);
+		System.out.println(intent + BLANK + BLANK + "Modifiers: " + constructorModifiers);
+		System.out.println(intent + BLANK + BLANK + "Parameter Types: ");
+		if(constructorParameterTypes.length == 0)
+		{
+			System.out.println(intent + BLANK + BLANK + BLANK + "None");
+		}
+		else
+		{
+			String parameterTypesString = "";
+			for(int p = 0 ; p < constructorParameterTypes.length ; p++)
+			{
+				if(p!=0)
+				{
+					parameterTypesString = parameterTypesString + ", ";
+				}
+				parameterTypesString += constructorParameterTypes[p].getCanonicalName();
+			}
+			System.out.println(intent + BLANK + BLANK + BLANK + parameterTypesString);
+		}
+		
+		System.out.println(intent + BLANK + BLANK + "Exception Types: ");
+		if(constructorExceptionTypes.length == 0)
+		{
+			System.out.println(intent + BLANK + BLANK + BLANK + "None");
+		}
+		else
+		{
+			String exceptionTypesString = "";
+			for(int p = 0 ; p < constructorExceptionTypes.length ; p++)
+			{
+				if(p!=0)
+				{
+					exceptionTypesString = exceptionTypesString + ", ";
+				}
+				exceptionTypesString += constructorExceptionTypes[p].getCanonicalName();
 			}
 			System.out.println(intent + BLANK + BLANK + BLANK + exceptionTypesString);
 		}
